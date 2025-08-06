@@ -62,7 +62,7 @@ a.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:2px solid 
     </div>
   </div>
 </div>
-
 <script src="/js/admin.js"></script>
 </body></html>`, { headers: { "content-type": "text/html; charset=utf-8" }});
 }
+
