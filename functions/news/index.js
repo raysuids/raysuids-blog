@@ -6,4 +6,52 @@ export async function onRequestGet() {
 <!-- 繁/简按钮注入（确保子页也有） -->
 <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.min.js"></script>
 <script defer src="/js/zh-toggle.js"></script>
-...
+@@ -4,29 +4,33 @@ export async function onRequestGet() {
+<title>新闻 - Ray's Blog</title>
+<link rel="stylesheet" href="/css/extended/custom.css">
+<style>
+.container{max-width:1100px;margin:26px auto;padding:0 20px}
+.filter{display:flex;gap:10px;align-items:center;margin:8px 0 12px}
+.filter .btn{background:#fff;color:#3b82f6;border:2px solid #3b82f6}
+.container{max-width:1200px;margin:26px auto;padding:0 20px}
+.grid{display:grid;gap:18px}
+@media (min-width:980px){ .grid{grid-template-columns:repeat(2,1fr)} }
+.card{background:#fff;border-radius:16px;box-shadow:0 12px 30px rgba(18,25,38,.06);overflow:hidden;display:flex;gap:0;min-height:140px}
+.thumb{width:40%;min-height:140px;background:#eef2ff;display:flex;align-items:center;justify-content:center}
+@media (min-width:1500px){ .grid{grid-template-columns:repeat(4,1fr)} }
+@media (min-width:1100px) and (max-width:1499.98px){ .grid{grid-template-columns:repeat(3,1fr)} }
+@media (min-width:700px) and (max-width:1099.98px){ .grid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:699.98px){ .grid{grid-template-columns:1fr} }
+.card{background:#fff;border-radius:16px;box-shadow:0 12px 30px rgba(18,25,38,.06);overflow:hidden;display:flex;flex-direction:column}
+.thumb{aspect-ratio:16/9;background:#eef2ff}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.body{padding:12px 14px 14px;flex:1}
+.body{padding:12px 14px 14px}
+.title{font-size:16px;margin:0 0 6px}
+.meta{color:#9ca3af;font-size:13px;margin-bottom:6px}
+.desc{color:#6b7280;font-size:14px;line-height:1.6}
+.desc{color:#6b7280;font-size:14px;line-height:1.6;min-height:40px}
+.filter{display:flex;gap:10px;margin:8px 0 12px}
+.btn{padding:8px 12px;border-radius:10px;border:2px solid #3b82f6;background:#fff;color:#3b82f6;font-weight:600}
+</style></head><body>
+<div class="container">
+  <h1>新闻</h1>
+  <div class="filter">
+    <button class="btn" data-region="ALL">全部</button>
+    <button class="btn" data-region="HK">香港</button>
+    <button class="btn" data-region="MO">澳門</button>
+    <button class="btn" data-region="TW">臺灣</button>
+    <button class="btn" data-r="ALL">全部</button>
+    <button class="btn" data-r="HK">香港</button>
+    <button class="btn" data-r="MO">澳門</button>
+    <button class="btn" data-r="TW">臺灣</button>
+    <button class="btn" data-r="CN">大陸</button>
+  </div>
+  <div id="news-grid" class="grid"></div>
+  <div id="grid" class="grid"></div>
+</div>
+<script src="/js/news.js"></script>
+</body></html>`, { headers: { "content-type":"text/html; charset=utf-8" }});
+<script src="/js/news-list.js"></script>
+</body></html>`, { headers:{ "content-type":"text/html; charset=utf-8" }});
+}
