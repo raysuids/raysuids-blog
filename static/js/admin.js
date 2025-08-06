@@ -1,4 +1,4 @@
-let ADMIN_KEY = ""; // 仅当前页面内存保存
+let ADMIN_KEY = ""; // 只保存在内存；刷新即失效
 
 const $ = s => document.querySelector(s);
 const html = (t, h) => { const el = document.createElement(t); el.innerHTML = h; return el; };
@@ -9,17 +9,29 @@ async function login(){
   try{
     const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ pass }) });
     const d = await r.json();
-    if(d.ok){ ADMIN_KEY = d.key; $('#adm-login').style.display='none'; $('#adm-panel').style.display='block'; initPanel(); }
-    else { $('#adm-tip').textContent = d.error || '密码错误'; }
-  }catch{ $('#adm-tip').textContent = '网络错误'; }
+    if(d.ok){
+      ADMIN_KEY = d.key;
+      $('#adm-login').style.display='none';
+      $('#adm-panel').style.display='block';
+      initPanel();
+    }else{
+      $('#adm-tip').textContent = d.error || '密码错误';
+    }
+  }catch{
+    $('#adm-tip').textContent = '网络错误';
+  }
 }
 
 function logout(){
-  ADMIN_KEY = "";
+  ADMIN_KEY = "";            // 清除内存中的密钥
   $('#adm-login').style.display='block';
   $('#adm-panel').style.display='none';
   $('#adm-pass').value = "";
+  // 保险：同时刷新一次，确保所有状态/变量被清空
+  setTimeout(()=>location.replace('/admin/'), 0);
+  return false;
 }
+window.logout = logout; // 暴露给内联 onclick 使用
 
 async function initPanel(){ loadList(); loadSettings(); loadAbout(); }
 
@@ -79,9 +91,11 @@ async function saveAbout(){
   const d=await r.json(); $('#about-tip').textContent = d.ok ? '已保存' : (d.error||'失败');
 }
 
-$('#adm-go')?.addEventListener('click', login);
-$('#adm-logout')?.addEventListener('click', logout);
-$('#p-save')?.addEventListener('click', savePost);
-$('#p-list')?.addEventListener('click', loadList);
-$('#s-save')?.addEventListener('click', saveSettings);
-$('#about-save')?.addEventListener('click', saveAbout);
+document.addEventListener('DOMContentLoaded', ()=>{
+  $('#adm-go')?.addEventListener('click', login);
+  $('#p-save')?.addEventListener('click', savePost);
+  $('#p-list')?.addEventListener('click', loadList);
+  $('#s-save')?.addEventListener('click', saveSettings);
+  $('#about-save')?.addEventListener('click', saveAbout);
+});
+
