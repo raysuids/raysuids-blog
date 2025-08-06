@@ -1,3 +1,11 @@
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(n.title)} - Ray's News</title>
+<link rel="stylesheet" href="/css/extended/custom.css">
+<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.min.js"></script>
+<script defer src="/js/zh-toggle.js"></script>
+<style>/* 原有样式保持 */</style>
+</head>
 export async function onRequestGet({ params, env }) {
   try{
     const id = params.id;
@@ -42,6 +50,15 @@ h1{margin:0 0 10px;font-size:24px}
 .content figure{margin:0}
 .back{display:block;text-align:center;margin:14px auto}
 </style></head><body>
+<nav style="max-width:900px;margin:12px auto;padding:0 4px;font:14px system-ui">
+  <a href="/" style="margin-right:10px">首页</a>
+  <a href="/archives/" style="margin-right:10px">归档</a>
+  <a href="/tags/" style="margin-right:10px">标签</a>
+  <a href="/about/" style="margin-right:10px">关于</a>
+  <a href="/guestbook/" style="margin-right:10px">留言板</a>
+  <a href="/news/" style="margin-right:10px">新闻</a>
+  <a href="/admin/" style="font-weight:600">管理</a>
+</nav>
 <main>
   <h1>${esc(n.title)}</h1>
   <div class="meta">${esc(n.source)} · ${esc(n.region)} · ${(n.pub_at||'').replace('T',' ').slice(0,16)}</div>
