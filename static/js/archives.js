@@ -1,30 +1,21 @@
-function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
-
-(async ()=>{
-  // 动态
-  try{
-    const r=await fetch('/api/posts?limit=100');
-    const d=await r.json();
-    const ul=document.getElementById('dyn');
-    if(d.ok && d.list.length){
-      ul.innerHTML = d.list.map(p => `<li><a href="/p/${p.slug}">${esc(p.title)}</a><span class="time">${(p.created_at||'').replace('T',' ').slice(0,10)}</span></li>`).join('');
-    }else{ ul.innerHTML = '<li style="color:#9ca3af">暂无</li>'; }
-  }catch{ document.getElementById('dyn').innerHTML='<li style="color:#ef4444">加载失败</li>'; }
-
-  // 静态（从本站 RSS 读取）
-  try{
-    const r=await fetch('/index.xml'); const xml=await r.text();
-    const doc=new DOMParser().parseFromString(xml,'application/xml');
-    const items=[...doc.querySelectorAll('item')].slice(0,200);
-    const ul=document.getElementById('stat');
-    if(items.length){
-      ul.innerHTML = items.map(it=>{
-        const t=it.querySelector('title')?.textContent||'';
-        const link=it.querySelector('link')?.textContent||'#';
-        const pub=it.querySelector('pubDate')?.textContent||'';
-        const dt=pub? new Date(pub).toISOString().slice(0,10) : '';
-        return `<li><a href="${link}">${esc(t)}</a><span class="time">${dt}</span></li>`;
-      }).join('');
-    }else{ ul.innerHTML='<li style="color:#9ca3af">暂无</li>'; }
-  }catch{ document.getElementById('stat').innerHTML='<li style="color:#ef4444">加载失败</li>'; }
-})();
+export async function onRequestGet() {
+  return new Response(`<!doctype html><html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>归档 - Ray's Blog</title>
+<link rel="stylesheet" href="/css/extended/custom.css">
+<style>
+.container{max-width:980px;margin:28px auto;padding:0 16px}
+.section{background:#fff;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.06);padding:18px;margin-bottom:16px}
+ul.list{margin:0;padding:0;list-style:none}
+ul.list li{padding:8px 0;border-bottom:1px solid #f2f2f2}
+ul.list li:last-child{border-bottom:0}
+.time{color:#9ca3af;margin-left:8px}
+</style></head><body>
+<div class="container">
+  <h1>归档</h1>
+  <div class="section"><h3>动态文章（在线发布）</h3><ul id="dyn" class="list"></ul></div>
+  <div class="section"><h3>静态文章（Markdown）</h3><ul id="stat" class="list"></ul></div>
+</div>
+<script src="/js/archives.js"></script></body></html>`,
+  { headers: { "content-type":"text/html; charset=utf-8" }});
+}
