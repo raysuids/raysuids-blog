@@ -1,12 +1,16 @@
 baseURL: "https://raysuids.dpdns.org/"
 title: "Ray's Blog"
-paginate: 10
-theme: "PaperMod"   # 名称写 PaperMod 即可
 
-# 告诉 Hugo：用模块方式引入 PaperMod 主题（v4）
+# Hugo v0.128+ 的新分页写法
+pagination:
+  pagerSize: 10
+
+# 用 Hugo Modules 拉 PaperMod（注意：没有 /v4）
 module:
   imports:
-    - path: github.com/adityatelange/hugo-PaperMod/v4
+    - path: github.com/adityatelange/hugo-PaperMod
+
+theme: "PaperMod"
 
 enableRobotsTXT: true
 
