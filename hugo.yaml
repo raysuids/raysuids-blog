@@ -8,7 +8,6 @@ module:
   imports:
     - path: github.com/adityatelange/hugo-PaperMod
 
-# 使用模块主题（不要改 themes 目录）
 theme:
   - github.com/adityatelange/hugo-PaperMod
 
@@ -16,28 +15,11 @@ enableRobotsTXT: true
 
 params:
   defaultTheme: auto
-
-  # 主页名片（用于顶部导航的个人信息）
-  profileMode:
-    enabled: false
-
-  # 文章页与列表增强
   ShowReadingTime: true
   ShowBreadCrumbs: true
   ShowPostNavLinks: true
   ShowShareButtons: true
 
-  # 主页横幅要用到的文字
-  hero:
-    title: "Hi，我是 Ray"
-    subtitle: "学生｜数码玩家｜随手记点东西"
-    buttons:
-      - text: "开始阅读"
-        url: "/posts/"
-      - text: "关于我"
-        url: "/about/"
-
-  # 页面底部社交
   socialIcons:
     - name: github
       url: "https://github.com/你的GitHub用户名"
@@ -58,7 +40,13 @@ menu:
     - name: 关于
       url: /about/
       weight: 4
+    - name: 留言板
+      url: /guestbook/
+      weight: 5
 
+markup:
+  highlight:
+    noClasses: false
 markup:
   highlight:
     noClasses: false
