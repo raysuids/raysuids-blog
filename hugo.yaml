@@ -2,13 +2,16 @@ baseURL: "https://raysuids.dpdns.org/"
 title: "Ray's Blog"
 
 pagination:
-  pagerSize: 10
+  pagerSize: 10   # Hugo 0.128+ 新写法，替代 paginate
 
 module:
   imports:
-    - path: github.com/adityatelange/hugo-PaperMod  # 注意：没有 /v4
+    - path: github.com/adityatelange/hugo-PaperMod   # 注意：没有 /v4
 
-theme: "PaperMod"
+# 关键：把 theme 写成“模块路径”，让 Hugo 用模块主题，而不是找 themes 文件夹
+theme:
+  - github.com/adityatelange/hugo-PaperMod
+
 enableRobotsTXT: true
 
 params:
