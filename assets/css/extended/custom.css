@@ -1,44 +1,33 @@
-/* 主色（链接/按钮） */
 :root {
-  --primary: #3b82f6;
-  --link-color: var(--primary);
+  --primary: #3b82f6;   /* 主色：天蓝 */
+  --bg: #f7f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
 }
 
-/* 背景更柔和 */
-body { background: #f7f7fb; }
+body { background: var(--bg); }
 
-/* 顶部栏轻微毛玻璃 */
 header.header {
-  backdrop-filter: saturate(1.2) blur(6px);
-  background: rgba(255,255,255,0.7);
+  backdrop-filter: saturate(1.2) blur(8px);
+  background: rgba(255,255,255,0.75);
 }
 
-/* 卡片：圆角+阴影 */
-.post-entry, .single .post-content, .archive-entry, .profile {
+.post-entry, .single .post-content, .archive-entry {
   border-radius: 14px;
-  box-shadow: 0 10px 26px rgba(0,0,0,0.06);
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
   overflow: hidden;
 }
 
-/* 封面图圆角 */
 .post-entry .entry-cover img, .single .post-cover img {
   border-radius: 14px 14px 0 0;
 }
 
-/* 链接悬停动效 */
-a { transition: all .15s ease; }
-a:hover { opacity: .9; }
+a { transition: all .18s ease; }
+a:hover { opacity: .92; }
 
-/* 标签样式 */
 .tag, .terms-tags a {
   border-radius: 999px;
   padding: 2px 10px;
 }
 
-/* 页脚更淡 */
 .footer { opacity: .75; }
-
-/* 标签/分类页也显示缩略图（如有） */
-.tag-entry .entry-cover, .category-entry .entry-cover {
-  display: block !important;
-}
