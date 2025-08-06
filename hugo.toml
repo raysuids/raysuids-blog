@@ -55,7 +55,10 @@ theme = "github.com/adityatelange/hugo-PaperMod"
     name = "留言板"
     url  = "/guestbook/"
     weight = 5
-
+  [[menu.main]]
+    name = "新闻"
+    url  = "/news/"
+    weight = 6
 # 允许 Markdown 中的原生 HTML（防止表单/按钮被转义）
 [markup]
   [markup.goldmark]
