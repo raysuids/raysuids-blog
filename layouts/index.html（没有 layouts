@@ -1,0 +1,46 @@
+{{ define "main" }}
+
+<link rel="stylesheet" href="{{ "css/home.css" | relURL }}">
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <h1>{{ with .Site.Params.hero.title }}{{ . }}{{ else }}{{ .Site.Title }}{{ end }}</h1>
+    <p class="subtitle">{{ .Site.Params.hero.subtitle }}</p>
+    <div class="hero-buttons">
+      {{ range .Site.Params.hero.buttons }}
+        <a class="btn" href="{{ .url }}">{{ .text }}</a>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+<section class="cards container">
+  <h2 class="sec-title">最新文章</h2>
+  <div class="grid">
+    {{ range first 6 (where .Site.RegularPages "Type" "in" (slice "posts" "post")) }}
+      <a class="card" href="{{ .RelPermalink }}">
+        <div class="cover">
+          {{ with .Params.cover.image }}
+            <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+          {{ else }}
+            <div class="ph"></div>
+          {{ end }}
+        </div>
+        <div class="meta">
+          <h3 class="title">{{ .Title }}</h3>
+          <p class="desc">{{ .Summary | plainify | truncate 96 }}</p>
+          <div class="info">
+            <span>{{ .Date.Format "2006-01-02" }}</span>
+            {{ with index .Params.tags 0 }}<span class="dot">•</span><span>#{{ . }}</span>{{ end }}
+          </div>
+        </div>
+      </a>
+    {{ end }}
+  </div>
+  <div class="more">
+    <a class="btn ghost" href="/posts/">浏览全部文章</a>
+  </div>
+</section>
+
+{{ end }}
