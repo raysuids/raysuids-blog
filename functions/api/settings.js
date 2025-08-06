@@ -5,9 +5,10 @@ export async function onRequestGet({ env }){
   return jr({ ok:true, data: obj });
 }
 export async function onRequestPost({ request, env }){
-  if(request.headers.get('X-Admin-Key') !== env.ADMIN_PASS) return jr({ok:false,error:'未授权'});
+  if(request.headers.get('X-Admin-Key') !== env.ADMIN_PASS) return jr({ok:false,error:'未授权'},401);
   const d = await request.json();
   const kv = Object.entries(d||{});
-  const tx = await env.DB.batch(kv.map(([k,v])=> env.DB.prepare("INSERT INTO settings (k,v) VALUES (?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(k, String(v||''))));
-  return jr({ ok:true, count: tx.length });
+  if(!kv.length) return jr({ ok:false, error:'无内容' },400);
+  await env.DB.batch(kv.map(([k,v])=> env.DB.prepare("INSERT INTO settings (k,v) VALUES (?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(k, String(v??''))));
+  return jr({ ok:true });
 }
