@@ -1,22 +1,71 @@
 baseURL: "https://raysuids.dpdns.org/"
 title: "Ray's Blog"
 
+# Hugo 0.128+ 的分页写法
 pagination:
-  pagerSize: 10   # Hugo 0.128+ 新写法，替代 paginate
+  pagerSize: 10
 
+# 用 Hugo Modules 引入主题（注意：没有 /v4）
 module:
   imports:
-    - path: github.com/adityatelange/hugo-PaperMod   # 注意：没有 /v4
+    - path: github.com/adityatelange/hugo-PaperMod
 
-# 关键：把 theme 写成“模块路径”，让 Hugo 用模块主题，而不是找 themes 文件夹
+# 指定主题（写成模块路径，避免去找 /themes 目录）
 theme:
   - github.com/adityatelange/hugo-PaperMod
 
 enableRobotsTXT: true
 
 params:
-  env: production
+  # 站点默认明暗色：auto / dark / light
   defaultTheme: auto
-  homeInfoParams:
-    Title: "嗨，我是 Ray"
-    Content: "欢迎来到我的博客。"
+
+  # 主页样式：头像名片 + 按钮（把头像放到 static/images/avatar.jpg）
+  profileMode:
+    enabled: true
+    title: "Ray"
+    subtitle: "学生｜数码｜随手写点东西"
+    imageUrl: "/images/avatar.jpg"
+    imageWidth: 140
+    imageHeight: 140
+    buttons:
+      - name: 文章
+        url: /posts/
+      - name: 归档
+        url: /archives/
+      - name: 关于
+        url: /about/
+
+  # 文章页与列表的常用开关
+  ShowReadingTime: true        # 阅读时长
+  ShowBreadCrumbs: true        # 面包屑
+  ShowPostNavLinks: true       # 上/下一篇
+  ShowShareButtons: true       # 分享按钮
+
+  # 主页下方的社交图标
+  socialIcons:
+    - name: github
+      url: "https://github.com/你的GitHub用户名"
+    - name: rss
+      url: "/index.xml"
+
+# 顶部导航菜单
+menu:
+  main:
+    - name: 主页
+      url: /
+      weight: 1
+    - name: 归档
+      url: /archives/
+      weight: 2
+    - name: 标签
+      url: /tags/
+      weight: 3
+    - name: 关于
+      url: /about/
+      weight: 4
+
+# 语法高亮（保持主题默认；需要可再调）
+markup:
+  highlight:
+    noClasses: false
