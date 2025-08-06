@@ -15,16 +15,33 @@
 .title{font-size:16px;margin:0 0 6px}
 .meta{color:#9ca3af;font-size:13px;margin-bottom:6px}
 .desc{color:#6b7280;font-size:14px;line-height:1.6;min-height:40px}
+.hero{position:relative;padding:64px 20px 52px;overflow:hidden;background:
+  radial-gradient(900px 360px at 50% -20%,rgba(59,130,246,.28),rgba(59,130,246,0)),
+  linear-gradient(180deg,rgba(59,130,246,.08),rgba(59,130,246,0));
+}
+.hero .inner{max-width:980px;margin:0 auto;text-align:center}
+.hero h1{font-size:40px;margin:0 0 8px}
+.hero p{color:#4b5563;margin:0 auto 6px}
 </style>
 
-<section class="container" style="padding-top:28px">
-  <h1 style="margin:0 0 6px">新闻</h1>
-  <div class="grid cols" id="news-grid"></div>
-  <div style="text-align:center;margin:12px 0 28px">
-    <a class="btn ghost" href="/news/">进入新闻页面</a>
+<!-- 欢迎横幅（蓝色背景） -->
+<section class="hero">
+  <div class="inner">
+    <h1>{{ with site.Params.hero_title }}{{ . }}{{ else }}歡迎來到 Ray 的網站{{ end }}</h1>
+    <p>{{ with site.Params.hero_sub }}{{ . }}{{ else }}學生 · 數碼玩家 · 隨手記一些東西{{ end }}</p>
   </div>
 </section>
 
+<!-- 新闻 -->
+<section class="container" style="padding-top:20px">
+  <h2 class="sec-title">新聞</h2>
+  <div class="grid cols" id="news-grid"></div>
+  <div style="text-align:center;margin:12px 0 28px">
+    <a class="btn ghost" href="/news/">進入新聞頁面</a>
+  </div>
+</section>
+
+<!-- 文章 -->
 <section class="container" style="padding-bottom:24px">
   <h2 class="sec-title">文章</h2>
   <div class="grid cols" id="post-grid">
@@ -46,4 +63,3 @@
 
 <script src="/js/news-home.js"></script>
 {{ end }}
-
