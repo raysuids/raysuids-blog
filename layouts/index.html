@@ -1,46 +1,51 @@
 {{ define "main" }}
-
 <link rel="stylesheet" href="{{ "css/home.css" | relURL }}">
 
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
-    <h1>{{ with .Site.Params.hero.title }}{{ . }}{{ else }}{{ .Site.Title }}{{ end }}</h1>
-    <p class="subtitle">{{ .Site.Params.hero.subtitle }}</p>
+    <h1>Hi，我是 Ray</h1>
+    <p class="subtitle">学生｜数码玩家｜随手记点东西</p>
     <div class="hero-buttons">
-      {{ range .Site.Params.hero.buttons }}
-        <a class="btn" href="{{ .url }}">{{ .text }}</a>
-      {{ end }}
+      <a class="btn" href="/posts/">开始阅读</a>
+      <a class="btn ghost" href="/about/">关于我</a>
     </div>
   </div>
 </section>
 
 <section class="cards container">
   <h2 class="sec-title">最新文章</h2>
-  <div class="grid">
-    {{ range first 6 (where .Site.RegularPages "Type" "in" (slice "posts" "post")) }}
-      <a class="card" href="{{ .RelPermalink }}">
-        <div class="cover">
-          {{ with .Params.cover.image }}
-            <img src="{{ . | relURL }}" alt="{{ $.Title }}">
-          {{ else }}
-            <div class="ph"></div>
-          {{ end }}
-        </div>
-        <div class="meta">
-          <h3 class="title">{{ .Title }}</h3>
-          <p class="desc">{{ .Summary | plainify | truncate 96 }}</p>
-          <div class="info">
-            <span>{{ .Date.Format "2006-01-02" }}</span>
-            {{ with index .Params.tags 0 }}<span class="dot">•</span><span>#{{ . }}</span>{{ end }}
-          </div>
-        </div>
-      </a>
-    {{ end }}
-  </div>
+  <div id="dyn-grid" class="grid"></div>
   <div class="more">
     <a class="btn ghost" href="/posts/">浏览全部文章</a>
   </div>
 </section>
 
+<script>
+(async () => {
+  const box = document.getElementById('dyn-grid');
+  box.innerHTML = '<div style="color:#6b7280">加载中…</div>';
+  try{
+    const r = await fetch('/api/posts?limit=6');
+    const d = await r.json();
+    if(!d.ok) throw 0;
+    if(!d.list.length){ box.innerHTML = '<div style="color:#9ca3af">还没有动态文章，先去右下角管理里发布一篇吧。</div>'; return; }
+    box.innerHTML = d.list.map(p => `
+      <a class="card" href="/p/${p.slug}">
+        <div class="cover">${p.cover ? `<img src="${p.cover}" alt="${p.title}">` : `<div class="ph"></div>`}</div>
+        <div class="meta">
+          <h3 class="title">${p.title}</h3>
+          <p class="desc">${(p.content || '').replace(/<[^>]+>/g,'').slice(0,96)}</p>
+          <div class="info"><span>${(p.created_at||'').replace('T',' ').slice(0,10)}</span></div>
+        </div>
+      </a>
+    `).join('');
+  }catch(e){
+    box.innerHTML = '<div style="color:#ef4444">加载失败</div>';
+  }
+})();
+</script>
+
+<!-- 右下角“管理”悬浮按钮 -->
+<a href="/admin/" class="fab-admin" title="管理">管理</a>
 {{ end }}
