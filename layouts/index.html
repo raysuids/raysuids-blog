@@ -1,97 +1,49 @@
 {{ define "main" }}
 <link rel="stylesheet" href="{{ "css/home.css" | relURL }}">
+<style>
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+.sec-title{font-size:22px;margin:18px 0}
+.grid{display:grid;gap:18px}
+@media (min-width:1500px){ .grid.cols{grid-template-columns:repeat(4,1fr)} }
+@media (min-width:1100px) and (max-width:1499.98px){ .grid.cols{grid-template-columns:repeat(3,1fr)} }
+@media (min-width:700px) and (max-width:1099.98px){ .grid.cols{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:699.98px){ .grid.cols{grid-template-columns:1fr} }
+.card{background:#fff;border-radius:16px;box-shadow:0 12px 30px rgba(18,25,38,.06);overflow:hidden;display:flex;flex-direction:column}
+.thumb{aspect-ratio:16/9;background:#eef2ff}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.body{padding:12px 14px 14px}
+.title{font-size:16px;margin:0 0 6px}
+.meta{color:#9ca3af;font-size:13px;margin-bottom:6px}
+.desc{color:#6b7280;font-size:14px;line-height:1.6;min-height:40px}
+</style>
 
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
-    <h1>Hi，我是 Ray</h1>
-    <p class="subtitle">学生｜数码玩家｜随手记点东西</p>
-    <div class="hero-buttons">
-      <a class="btn" href="/posts/">开始阅读</a>
-      <a class="btn ghost" href="/about/">关于我</a>
-    </div>
+<section class="container" style="padding-top:28px">
+  <h1 style="margin:0 0 6px">新闻</h1>
+  <div class="grid cols" id="news-grid"></div>
+  <div style="text-align:center;margin:12px 0 28px">
+    <a class="btn ghost" href="/news/">进入新闻页面</a>
   </div>
 </section>
 
-<section class="cards container">
-  <h2 class="sec-title">最新文章</h2>
-
-  <!-- 先渲染“静态文章”（Markdown） -->
-  <div id="grid" class="grid">
-    {{ $count := 0 }}
-    {{ range first 6 (where .Site.RegularPages "Type" "in" (slice "posts" "post")) }}
-      {{ $count = add $count 1 }}
-      <a class="card static" href="{{ .RelPermalink }}">
-        <div class="cover">
-          {{ with .Params.cover.image }}<img src="{{ . | relURL }}" alt="{{ $.Title }}">{{ else }}<div class="ph"></div>{{ end }}
-        </div>
-        <div class="meta">
+<section class="container" style="padding-bottom:24px">
+  <h2 class="sec-title">文章</h2>
+  <div class="grid cols" id="post-grid">
+    {{ range first 12 (where .Site.RegularPages "Type" "in" (slice "posts" "post")) }}
+      <a class="card" href="{{ .RelPermalink }}">
+        <div class="thumb">{{ with .Params.cover.image }}<img src="{{ . | relURL }}" alt="">{{ end }}</div>
+        <div class="body">
           <h3 class="title">{{ .Title }}</h3>
-          <p class="desc">{{ .Summary | plainify | truncate 96 }}</p>
-          <div class="info"><span>{{ .Date.Format "2006-01-02" }}</span></div>
+          <div class="meta">{{ .Date.Format "2006-01-02" }}</div>
+          <div class="desc">{{ .Summary | plainify | truncate 96 }}</div>
         </div>
       </a>
     {{ end }}
   </div>
-
-  <div class="more"><a class="btn ghost" href="/archives/">进入归档</a></div>
+  <div style="text-align:center;margin:12px 0">
+    <a class="btn ghost" href="/archives/">查看全部文章</a>
+  </div>
 </section>
 
-<script>
-(async () => {
-  const box = document.getElementById('grid');
-  const seen = new Set([...box.querySelectorAll('a.card')].map(a => a.getAttribute('href')));
-
-  // 如果没有静态文章，尝试从 RSS 补上静态文章
-  if (seen.size === 0) {
-    try {
-      const rss = await (await fetch('/index.xml')).text();
-      const doc = new DOMParser().parseFromString(rss, 'application/xml');
-      const items = [...doc.querySelectorAll('item')].slice(0, 6);
-      items.forEach(it => {
-        const title = it.querySelector('title')?.textContent || '';
-        const link  = it.querySelector('link')?.textContent || '#';
-        const pub   = it.querySelector('pubDate')?.textContent || '';
-        const dt = pub ? new Date(pub).toISOString().slice(0,10) : '';
-        if (seen.has(link)) return;
-        seen.add(link);
-        box.insertAdjacentHTML('beforeend', `
-          <a class="card static" href="${link}">
-            <div class="cover"><div class="ph"></div></div>
-            <div class="meta">
-              <h3 class="title">${title}</h3>
-              <p class="desc"></p>
-              <div class="info"><span>${dt}</span></div>
-            </div>
-          </a>`);
-      });
-    } catch {}
-  }
-
-  // 追加“动态文章”
-  try {
-    const r = await fetch('/api/posts?limit=6');
-    const d = await r.json();
-    if (d.ok) {
-      d.list.forEach(p => {
-        const href = '/p/' + p.slug;
-        if (seen.has(href)) return;
-        seen.add(href);
-        box.insertAdjacentHTML('beforeend', `
-          <a class="card" href="${href}">
-            <div class="cover">${p.cover ? `<img src="${p.cover}" alt="${p.title}">` : `<div class="ph"></div>`}</div>
-            <div class="meta">
-              <h3 class="title">${p.title}</h3>
-              <p class="desc">${(p.content||'').replace(/<[^>]+>/g,'').slice(0,96)}</p>
-              <div class="info"><span>${(p.created_at||'').replace('T',' ').slice(0,10)}</span></div>
-            </div>
-          </a>`);
-      });
-    }
-  } catch {}
-})();
-</script>
-
-<!-- 右下角“管理” -->
-<a href="/admin/" class="fab-admin" title="管理">管理</a>
+<script src="/js/news-home.js"></script>
 {{ end }}
+
