@@ -59,6 +59,12 @@ theme = "github.com/adityatelange/hugo-PaperMod"
     name = "新闻"
     url  = "/news/"
     weight = 6
+    [menu]
+  # 其他菜单...
+  [[menu.main]]
+    name = "管理"
+    url  = "/admin/"
+    weight = 99
 # 允许 Markdown 中的原生 HTML（防止表单/按钮被转义）
 [markup]
   [markup.goldmark]
