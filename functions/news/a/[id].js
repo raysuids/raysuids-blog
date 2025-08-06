@@ -2,17 +2,27 @@ export async function onRequestGet({ params, env }) {
   try{
     const id = params.id;
     let row = await env.DB.prepare("SELECT * FROM news WHERE id=?").bind(id).first();
-    if(!row) return html(404, page("未找到此新闻","<p><a href='/'>返回首页</a></p>"));
-    if(!row.html){ // 没抓过 → 现场抓一次并入库
-      const raw = await fetch(row.link, { headers:{ "User-Agent":"Mozilla/5.0 RayBlog" }, cf:{ cacheTtl: 300 }});
-      if(raw.ok){
-        let body = await raw.text();
-        body = cleanHTML(body, row.link);
-        await env.DB.prepare("UPDATE news SET html=? WHERE id=?").bind(body, id).run();
-        row.html = body;
+    if(!row) return html(404, page("未找到此新聞","<p><a href='/'>返回首頁</a></p>"));
+
+    if(!row.html){
+      const got = await fetch(row.link, { headers:{ "User-Agent":"Mozilla/5.0 RayBlog" }, cf:{ cacheTtl: 300 }});
+      if(got.ok){
+        let body = await got.text();
+        body = siteAdapt(row.link, body) || cleanHTML(body, row.link);
+        // 过短视为失败
+        if(body.replace(/<[^>]+>/g,"").trim().length < 120){
+          row.html = ""; // 让前端走“跳原文”
+        }else{
+          await env.DB.prepare("UPDATE news SET html=? WHERE id=?").bind(body, id).run();
+          row.html = body;
+        }
       }
     }
-    const content = row.html || `<p>抱歉，無法抓取該新聞內容，<a href="${esc(row.link)}" target="_blank" rel="noopener">前往原文</a></p>`;
+
+    const content = row.html && row.html.trim()
+      ? row.html
+      : `<p>此來源暫不支持正文抓取，<a href="${esc(row.link)}" target="_blank" rel="noopener">點擊前往原文</a>。</p>`;
+
     return html(200, render(row, content));
   }catch(e){
     return html(500, page("服務器異常", `<pre>${esc(e.message||"")}</pre>`));
@@ -42,36 +52,69 @@ h1{margin:0 0 10px;font-size:24px}
 </body></html>`;
   }
   function page(t, h){return `<!doctype html><meta charset="utf-8"><title>${esc(t)}</title><div style="max-width:720px;margin:60px auto;font:16px/1.7 system-ui">${h}</div>`}
-  function html(s, h){return new Response(h,{status:s,headers:{ "content-type":"text/html; charset=utf-8", "cache-control":"no-store" }})}
+  function html(s, h){return new Response(h,{status:s,headers:{ "content-type":"text/html; charset=utf-8","cache-control":"no-store" }})}
   function esc(s){return (s||"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 
-  // 粗粒度提取正文 + 修正圖片為絕對地址；去掉腳本追蹤
+  // ---- 站點適配（能抓就抓，抓不到走 fallback）----
+  function siteAdapt(url, html){
+    const host = "";
+    try{ const u=new URL(url); html = html.replace(/<script[\s\S]*?<\/script>/gi,""); switch(true){
+      case /rthk\.hk$|\.rthk\.hk/i.test(u.hostname):
+        // RTHK：優先 main/article/section 內的段落
+        return pick(html,[
+          /<article[\s\S]*?<\/article>/i,
+          /<section[^>]*class=["'][^"']*(?:article|content)[^"']*["'][\s\S]*?<\/section>/i,
+          /<div[^>]*class=["'][^"']*(?:news|content|article)[^"']*["'][\s\S]*?<\/div>/i
+        ], u);
+      case /news\.now\.com/i.test(u.hostname):
+        return pick(html,[
+          /<div[^>]*class=["'][^"']*(?:newsContent|article|post)-?body[^"']*["'][\s\S]*?<\/div>/i,
+          /<article[\s\S]*?<\/article>/i
+        ], u);
+      case /cna\.com\.tw|udn\.com|yahoo\.com/i.test(u.hostname):
+        return pick(html,[
+          /<article[\s\S]*?<\/article>/i,
+          /<div[^>]*class=["'][^"']*(?:story|article|content)[^"']*["'][\s\S]*?<\/div>/i
+        ], u);
+      case /gov\.mo/i.test(u.hostname):
+        return pick(html,[
+          /<div[^>]*class=["'][^"']*entry-content[^"']*["'][\s\S]*?<\/div>/i,
+          /<article[\s\S]*?<\/article>/i
+        ], u);
+      default: return "";
+    }}catch{return ""}
+  }
+  function pick(h,regs,u){
+    for(const re of regs){ const m = h.match(re); if(m){ return fixImgs(m[0], u) } }
+    return "";
+  }
+  function fixImgs(html, u){
+    return html
+      .replace(/<style[\s\S]*?<\/style>/gi,"")
+      .replace(/<img[^>]*>/gi, tag=>{
+        let src = (tag.match(/\s(src|data-src|data-original)=["']([^"']+)["']/i)||[])[2]||"";
+        if(!src) return "";
+        try{ src = new URL(src, u).href }catch{}
+        return `<img src="${src}" referrerpolicy="no-referrer">`;
+      })
+      .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1");
+  }
   function cleanHTML(h, base){
-    // 去掉腳本/樣式
     h = h.replace(/<script[\s\S]*?<\/script>/gi,"").replace(/<style[\s\S]*?<\/style>/gi,"");
-    // 優先常見正文容器（盡量兼容）
+    let body = "";
     const picks = [
       /<article[\s\S]*?<\/article>/i,
       /<div[^>]+class=["'][^"']*(?:(?:content|article|story|entry|post)-?body)[^"']*["'][\s\S]*?<\/div>/i,
-      /<div[^>]+id=["'][^"']*(?:content|article|story|entry)[^"']*["'][\s\S]*?<\/div>/i,
       /<main[\s\S]*?<\/main>/i
     ];
-    let body = "";
     for(const re of picks){ const m = h.match(re); if(m){ body=m[0]; break; } }
-    if(!body){ // 退一步：抓多段<p>
-      const ps = h.match(/<p[\s\S]*?<\/p>/gi)||[]; body = ps.slice(0,60).join("\n");
-    }
-    // 修正圖片 src 為絕對地址，並替換 data-src 等懶加載屬性
-    body = body.replace(/<img[^>]*>/gi, tag=>{
+    if(!body){ const ps = h.match(/<p[\s\S]*?<\/p>/gi)||[]; body = ps.slice(0,60).join("\n"); }
+    return body.replace(/<img[^>]*>/gi, tag=>{
       let src = (tag.match(/\s(src|data-src|data-original)=["']([^"']+)["']/i)||[])[2]||"";
-      if(!src) return ""; // 沒圖就丟棄
+      if(!src) return "";
       try{ src = new URL(src, base).href }catch{}
       return `<img src="${src}" referrerpolicy="no-referrer">`;
-    });
-    // 移除多餘導航/分享
-    body = body.replace(/<nav[\s\S]*?<\/nav>/gi,"").replace(/<aside[\s\S]*?<\/aside>/gi,"");
-    // 收斂 a 標籤為純文本（避免外鏈）
-    body = body.replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1");
-    return body;
+    }).replace(/<nav[\s\S]*?<\/nav>/gi,"").replace(/<aside[\s\S]*?<\/aside>/gi,"")
+      .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1");
   }
 }
