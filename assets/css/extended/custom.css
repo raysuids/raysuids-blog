@@ -31,3 +31,19 @@ a:hover { opacity: .92; }
 }
 
 .footer { opacity: .75; }
+/* 留言板样式 */
+#gb-app { margin: 16px 0; }
+#gb-form { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 10px 0 16px; }
+#gb-form input, #gb-form textarea {
+  padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff;
+}
+#gb-form button {
+  width: 120px; padding: 10px 12px; border-radius: 10px; border: none;
+  background: var(--primary, #3b82f6); color: #fff; font-weight: 600;
+  box-shadow: 0 10px 24px rgba(59,130,246,.22);
+}
+.gb-list { display: grid; gap: 12px; }
+.gb-item { background:#fff; border-radius:14px; padding:12px 14px; box-shadow:0 8px 22px rgba(0,0,0,.06); }
+.gb-meta { color:#6b7280; display:flex; gap:10px; align-items:center; font-size: 14px; }
+.gb-meta b { color:#111827; }
+.gb-msg { margin-top: 6px; white-space: pre-wrap; line-height: 1.6; }
