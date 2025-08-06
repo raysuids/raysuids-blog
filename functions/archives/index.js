@@ -10,21 +10,12 @@ ul.list{margin:0;padding:0;list-style:none}
 ul.list li{padding:8px 0;border-bottom:1px solid #f2f2f2}
 ul.list li:last-child{border-bottom:0}
 .time{color:#9ca3af;margin-left:8px}
-</style>
-</head><body>
+</style></head><body>
 <div class="container">
   <h1>归档</h1>
-
-  <div class="section">
-    <h3>动态文章（在线发布）</h3>
-    <ul id="dyn" class="list"></ul>
-  </div>
-
-  <div class="section">
-    <h3>静态文章（Markdown）</h3>
-    <ul id="stat" class="list"></ul>
-  </div>
+  <div class="section"><h3>动态文章（在线发布）</h3><ul id="dyn" class="list"></ul></div>
+  <div class="section"><h3>静态文章（Markdown）</h3><ul id="stat" class="list"></ul></div>
 </div>
-<script src="/js/archives.js"></script>
-</body></html>`, { headers: { "content-type":"text/html; charset=utf-8" }});
+<script src="/js/archives.js"></script></body></html>`,
+  { headers: { "content-type":"text/html; charset=utf-8" }});
 }
