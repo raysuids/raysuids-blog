@@ -1,7 +1,27 @@
-const $ = sel => document.querySelector(sel);
+const $ = s => document.querySelector(s);
 const html = (t, h) => { const el = document.createElement(t); el.innerHTML = h; return el; };
 const setKey = k => sessionStorage.setItem('adm', k);
 const getKey = () => sessionStorage.getItem('adm') || '';
+
+async function verify() {
+  if (!getKey()) return false;
+  try {
+    const r = await fetch('/api/verify', { headers: { 'X-Admin-Key': getKey() }});
+    const d = await r.json(); return !!d.ok;
+  } catch { return false; }
+}
+
+async function boot() {
+  if (await verify()) {
+    $('#adm-login').style.display='none';
+    $('#adm-panel').style.display='block';
+    loadList(); loadSettings();
+  } else {
+    sessionStorage.removeItem('adm');
+    $('#adm-login').style.display='block';
+    $('#adm-panel').style.display='none';
+  }
+}
 
 async function login(){
   const pass = $('#adm-pass').value.trim();
@@ -9,7 +29,7 @@ async function login(){
   try{
     const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ pass }) });
     const d = await r.json();
-    if(d.ok){ setKey(d.key); $('#adm-login').style.display='none'; $('#adm-panel').style.display='block'; loadList(); loadSettings(); }
+    if(d.ok){ setKey(d.key); boot(); }
     else { $('#adm-tip').textContent = d.error || '密码错误'; }
   }catch{ $('#adm-tip').textContent = '网络错误'; }
 }
@@ -66,6 +86,5 @@ $('#p-save')?.addEventListener('click', savePost);
 $('#p-list')?.addEventListener('click', loadList);
 $('#s-save')?.addEventListener('click', saveSettings);
 
-// 自动登录
-if(getKey()){ $('#adm-login').style.display='none'; $('#adm-panel').style.display='block'; loadList(); loadSettings(); }
+boot(); // 页面加载时先向服务端校验
 
