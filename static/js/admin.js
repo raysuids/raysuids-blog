@@ -1,27 +1,7 @@
+let ADMIN_KEY = ""; // 仅当前页面内存保存
+
 const $ = s => document.querySelector(s);
 const html = (t, h) => { const el = document.createElement(t); el.innerHTML = h; return el; };
-const setKey = k => sessionStorage.setItem('adm', k);
-const getKey = () => sessionStorage.getItem('adm') || '';
-
-async function verify() {
-  if (!getKey()) return false;
-  try {
-    const r = await fetch('/api/verify', { headers: { 'X-Admin-Key': getKey() }});
-    const d = await r.json(); return !!d.ok;
-  } catch { return false; }
-}
-
-async function boot() {
-  if (await verify()) {
-    $('#adm-login').style.display='none';
-    $('#adm-panel').style.display='block';
-    loadList(); loadSettings();
-  } else {
-    sessionStorage.removeItem('adm');
-    $('#adm-login').style.display='block';
-    $('#adm-panel').style.display='none';
-  }
-}
 
 async function login(){
   const pass = $('#adm-pass').value.trim();
@@ -29,10 +9,19 @@ async function login(){
   try{
     const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ pass }) });
     const d = await r.json();
-    if(d.ok){ setKey(d.key); boot(); }
+    if(d.ok){ ADMIN_KEY = d.key; $('#adm-login').style.display='none'; $('#adm-panel').style.display='block'; initPanel(); }
     else { $('#adm-tip').textContent = d.error || '密码错误'; }
   }catch{ $('#adm-tip').textContent = '网络错误'; }
 }
+
+function logout(){
+  ADMIN_KEY = "";
+  $('#adm-login').style.display='block';
+  $('#adm-panel').style.display='none';
+  $('#adm-pass').value = "";
+}
+
+async function initPanel(){ loadList(); loadSettings(); loadAbout(); }
 
 async function loadList(){
   const r = await fetch('/api/posts?limit=50'); const d = await r.json();
@@ -52,7 +41,7 @@ async function loadList(){
       $('#p-save').dataset.id=d.data.id;
     }else if(a.dataset.del){
       if(!confirm('确认删除？'))return;
-      const rr=await fetch('/api/posts/'+a.dataset.del,{ method:'DELETE', headers:{'X-Admin-Key':getKey()}});
+      const rr=await fetch('/api/posts/'+a.dataset.del',{ method:'DELETE', headers:{'X-Admin-Key':ADMIN_KEY}});
       const dd=await rr.json(); alert(dd.ok?'已删除':(dd.error||'失败')); loadList();
     }
   };
@@ -66,7 +55,7 @@ async function savePost(){
   $('#p-tip').textContent='保存中…';
   const method = id ? 'PUT' : 'POST';
   const url = id ? '/api/posts/'+id : '/api/posts';
-  const r=await fetch(url,{ method, headers:{'Content-Type':'application/json','X-Admin-Key':getKey()}, body: JSON.stringify({ title, slug, cover, content }) });
+  const r=await fetch(url,{ method, headers:{'Content-Type':'application/json','X-Admin-Key':ADMIN_KEY}, body: JSON.stringify({ title, slug, cover, content }) });
   const d=await r.json(); $('#p-tip').textContent = d.ok ? '已保存' : (d.error||'失败');
   if(d.ok){ delete $('#p-save').dataset.id; loadList(); }
 }
@@ -77,14 +66,22 @@ async function loadSettings(){
 }
 async function saveSettings(){
   const payload={ hero_title:$('#s-hero-title').value.trim(), hero_sub:$('#s-hero-sub').value.trim(), avatar:$('#s-avatar').value.trim() };
-  const r=await fetch('/api/settings',{ method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':getKey()}, body: JSON.stringify(payload)});
+  const r=await fetch('/api/settings',{ method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':ADMIN_KEY}, body: JSON.stringify(payload)});
   const d=await r.json(); $('#s-tip').textContent = d.ok ? '已保存' : (d.error||'失败');
 }
 
+async function loadAbout(){
+  const r=await fetch('/api/settings'); const d=await r.json();
+  if(d.ok){ $('#about-html').value = d.data.about_html || ''; }
+}
+async function saveAbout(){
+  const r=await fetch('/api/settings',{ method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':ADMIN_KEY}, body: JSON.stringify({ about_html: $('#about-html').value })});
+  const d=await r.json(); $('#about-tip').textContent = d.ok ? '已保存' : (d.error||'失败');
+}
+
 $('#adm-go')?.addEventListener('click', login);
+$('#adm-logout')?.addEventListener('click', logout);
 $('#p-save')?.addEventListener('click', savePost);
 $('#p-list')?.addEventListener('click', loadList);
 $('#s-save')?.addEventListener('click', saveSettings);
-
-boot(); // 页面加载时先向服务端校验
-
+$('#about-save')?.addEventListener('click', saveAbout);
