@@ -1,6 +1,6 @@
 function j(d,s=200){return new Response(JSON.stringify(d),{status:s,headers:{'content-type':'application/json'}})}
 export async function onRequestGet({ params, env }) {
-  const row = await env.DB.prepare("SELECT * FROM posts WHERE id=?").bind(params.id).get();
+  const row = await env.DB.prepare("SELECT * FROM posts WHERE id=?").bind(params.id).first();
   if(!row) return j({ok:false,error:'not found'},404);
   return j({ ok:true, data: row });
 }
