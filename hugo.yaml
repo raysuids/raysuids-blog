@@ -14,12 +14,17 @@ theme:
 enableRobotsTXT: true
 
 params:
-  defaultTheme: auto
+  # 关闭暗色模式与切换按钮
+  defaultTheme: light
+  disableThemeToggle: true
+
+  # 文章页与列表增强
   ShowReadingTime: true
   ShowBreadCrumbs: true
   ShowPostNavLinks: true
   ShowShareButtons: true
 
+  # 底部社交
   socialIcons:
     - name: github
       url: "https://github.com/你的GitHub用户名"
@@ -44,9 +49,6 @@ menu:
       url: /guestbook/
       weight: 5
 
-markup:
-  highlight:
-    noClasses: false
 markup:
   highlight:
     noClasses: false
