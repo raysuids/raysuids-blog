@@ -1,24 +1,19 @@
 export async function onRequestGet({ params, env }) {
   try {
     const key = params.slug;
-    let row = await env.DB.prepare("SELECT * FROM posts WHERE slug=?").bind(key).get();
-    // 支持 /p/数字 作为文章 id 访问
+    let row = await env.DB.prepare("SELECT * FROM posts WHERE slug=?").bind(key).first();
     if (!row && /^\d+$/.test(key)) {
-      row = await env.DB.prepare("SELECT * FROM posts WHERE id=?").bind(Number(key)).get();
+      row = await env.DB.prepare("SELECT * FROM posts WHERE id=?").bind(Number(key)).first();
     }
-    if (!row) {
-      return new Response(page404(), { status: 404, headers: { "content-type": "text/html; charset=utf-8" } });
-    }
-    return new Response(renderPost(row), { headers: { "content-type": "text/html; charset=utf-8" } });
+    if (!row) return new Response(page404(), { status: 404, headers: h() });
+    return new Response(renderPost(row), { headers: h() });
   } catch (e) {
-    return new Response(page500(e?.message), { status: 500, headers: { "content-type": "text/html; charset=utf-8" } });
+    return new Response(page500(e?.message), { status: 500, headers: h() });
   }
 }
-
-function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
-
-function renderPost(row){
-  return `<!doctype html><html lang="zh-CN"><head>
+const h=()=>({ "content-type":"text/html; charset=utf-8" });
+const esc=s=>(s||'').toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+function renderPost(row){return `<!doctype html><html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(row.title)} - Ray's Blog</title>
 <link rel="stylesheet" href="/css/extended/custom.css">
@@ -40,16 +35,6 @@ h1{margin:6px 0 8px;}
   <div class="post-content">${row.content || ""}</div>
 </main>
 <a href="/" class="fab-admin">返回首页</a>
-</body></html>`;
-}
-
-function page404(){
-  return `<!doctype html><meta charset="utf-8"><title>404</title>
-  <div style="max-width:720px;margin:60px auto;font:16px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto">
-    <h2>未找到文章</h2><p>请确认链接是否正确。</p><p><a href="/">返回首页</a></p></div>`;
-}
-function page500(msg){
-  return `<!doctype html><meta charset="utf-8"><title>出错了</title>
-  <div style="max-width:720px;margin:60px auto;font:16px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto">
-    <h2>服务器异常</h2><p>${esc(msg||"未知错误")}</p><p><a href="/">返回首页</a></p></div>`;
-}
+</body></html>`}
+function page404(){return `<!doctype html><meta charset="utf-8"><div style="max-width:720px;margin:60px auto;font:16px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto"><h2>未找到文章</h2><p><a href="/">返回首页</a></p></div>`}
+function page500(m){return `<!doctype html><meta charset="utf-8"><div style="max-width:720px;margin:60px auto;font:16px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto"><h2>服务器异常</h2><p>${esc(m||"未知错误")}</p><p><a href="/">返回首页</a></p></div>`}
