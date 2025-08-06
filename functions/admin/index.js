@@ -17,11 +17,11 @@ a.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:2px solid 
 .list li{margin:6px 0}
 .faint{color:#9ca3af}
 .actions{display:flex;gap:10px;align-items:center}
-</style>
-</head><body>
+</style></head><body>
 <div class="container">
   <h1>管理</h1>
 
+  <!-- 登录卡片（每次进入都要先登录，不保存状态） -->
   <div class="card" id="adm-login">
     <div class="grid">
       <input id="adm-pass" type="password" placeholder="管理员密码" />
@@ -32,7 +32,10 @@ a.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:2px solid 
     </div>
   </div>
 
+  <!-- 管理面板 -->
   <div class="card" id="adm-panel" style="display:none">
+    <div class="actions" style="justify-content:end"><a id="adm-logout" class="btn" href="javascript:;">退出登录</a></div>
+
     <h3>发布/编辑文章</h3>
     <div class="row">
       <input id="p-title" placeholder="标题" />
@@ -50,6 +53,7 @@ a.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:2px solid 
     <ul id="p-ul" class="list"></ul>
 
     <hr style="margin:16px 0;border:0;border-top:1px solid #eee" />
+
     <h3>站点设置</h3>
     <div class="row">
       <input id="s-hero-title" placeholder="首页标题（如：Hi，我是 Ray）" />
@@ -60,9 +64,16 @@ a.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:2px solid 
       <button id="s-save">保存设置</button>
       <span id="s-tip" class="faint"></span>
     </div>
+
+    <h3 style="margin-top:14px">关于页面</h3>
+    <textarea id="about-html" rows="10" placeholder="这里写关于页内容（支持 HTML）"></textarea>
+    <div class="actions">
+      <button id="about-save">保存关于页</button>
+      <span id="about-tip" class="faint"></span>
+    </div>
   </div>
 </div>
 <script src="/js/admin.js"></script>
-</body></html>`, { headers: { "content-type": "text/html; charset=utf-8" }});
+</body></html>`,
+  { headers: { "content-type":"text/html; charset=utf-8" }});
 }
-
